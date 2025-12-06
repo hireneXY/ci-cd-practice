@@ -5,13 +5,10 @@ on:
     branches: [ "main", "master" ]
   workflow_dispatch:
 
-# 环境变量：统一小写 + 提取SHA前7位
+# 仅定义基础环境变量（避免表达式函数）
 env:
-  # 镜像名强制小写（解决GHCR大小写问题）
   IMAGE_NAME: "hirenexy/ci-cd-practice"
-  IMAGE_TAG_SHORT: ${{ slice(github.sha, 0, 7) }}
-  # 完整SHA（可选，如需更唯一可保留）
-  IMAGE_TAG_FULL: ${{ github.sha }}
+  FULL_SHA: ${{ github.sha }}
 
 jobs:
   test-job:
@@ -42,6 +39,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 新增步骤：用Shell命令提取SHA前7位（100%兼容）
+      - name: Get short SHA
+        id: get-sha
+        run: echo "SHORT_SHA=${{ env.FULL_SHA }}:::0:7" | sed 's/:::/\\:/g' | xargs -I {} echo "{}" | cut -c1-7 | xargs echo "SHORT_SHA={}" >> $GITHUB_ENV
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -57,10 +59,9 @@ jobs:
         with:
           context: .
           push: true
-          # 同时打3个标签（按需选择，推荐短SHA+latest）
+          # 用Shell提取的短SHA + latest标签
           tags: |
-            ghcr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_SHORT }}  # 短SHA（核心：唯一标识）
-            ghcr.io/${{ env.IMAGE_NAME }}:latest                       # latest（最新版本）
-            # ghcr.io/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG_FULL }}  # 完整SHA（可选，注释掉则不打）
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
+            ghcr.io/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
