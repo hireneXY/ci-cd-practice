@@ -68,7 +68,7 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}  # 短SHA标签（唯一）
-            ghcr.io/${{ env.IMAGE_NAME }}:latest               # latest标签（最新）
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ env.SHORT_SHA }}
+            ghcr.io/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
