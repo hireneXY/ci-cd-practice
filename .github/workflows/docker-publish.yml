@@ -9,8 +9,7 @@ on:
 env:
   # 镜像名强制小写（解决GHCR大小写问题）
   IMAGE_NAME: "hirenexy/ci-cd-practice"
-  # Git Commit SHA前7位（短哈希，更易识别），也可保留完整SHA（github.sha）
-  IMAGE_TAG_SHORT: ${{ substr(github.sha, 0, 7) }}
+  IMAGE_TAG_SHORT: ${{ slice(github.sha, 0, 7) }}
   # 完整SHA（可选，如需更唯一可保留）
   IMAGE_TAG_FULL: ${{ github.sha }}
 
